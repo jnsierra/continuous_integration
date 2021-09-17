@@ -88,7 +88,7 @@ pipeline {
         stage('Download Zipkin'){
             steps {
                 echo 'Descarga del jar'
-                sh 'mv /volumenes/vol_jenkins/artifacts/zipkin-server-2.23.2-exec.jar server-zipkin/jar/'
+                sh 'mv /var/jenkins_home/artifacts/zipkin-server-2.23.2-exec.jar server-zipkin/jar/'
             }
         }
         stage('Tag Images'){
