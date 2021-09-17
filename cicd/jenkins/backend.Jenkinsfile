@@ -85,6 +85,12 @@ pipeline {
                 }
             }
         }
+        stage('Download Zipkin'){
+            steps {
+                echo 'Descarga del jar'
+                sh 'curl -sSL https://zipkin.io/quickstart.sh | bash -s'
+            }
+        }
         stage('Tag Images'){
             steps {
                 echo 'Ini Tag images...'
