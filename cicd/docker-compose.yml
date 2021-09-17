@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+    jenkins:
+        user: root
+        image: 192.168.0.30:5000/api-jenkins:latest
+        ports:
+         - "8082:8080"
+         - "50000:50000"
+        volumes:
+         - /var/run/docker.sock:/var/run/docker.sock
+         - /volumenes/vol_jenkins:/var/jenkins_home
+        environment:
+         - JENKINS_ADMIN_ID=admin
+         - JENKINS_ADMIN_PASSWORD=admin
+         - IP_REGISTRY=192.168.0.30
+        deploy:
+            mode: replicated
+            replicas: 1
+            placement:
+                constraints:
+                 - "node.role==manager"
+    gitlab:
+        image: 'gitlab/gitlab-ee:latest'
+        restart: always
+        hostname: 'gitlab.example.com'
+        environment:
+            JENKINS_URL: http://192.168.0.30:8082
+            GITLAB_OMNIBUS_CONFIG: |
+                external_url 'http://192.168.0.20:8929'
+                gitlab_rails['gitlab_shell_ssh_port'] = 2224
+        ports:
+         - '8929:8929'
+         - '2224:22'
+        volumes:
+         - '/volumenes/vol_gitlab/config:/etc/gitlab'
+         - '/volumenes/vol_gitlab/logs:/var/log/gitlab'
+         - '/volumenes/vol_gitlab/data:/var/opt/gitlab'
+        deploy:
+            mode: replicated
+            replicas: 1
+            placement:
+                constraints:
+                 - "node.role==manager"
+    #sonar:
+    #    image: 'sonarqube'
+    #    ports:
+    #     - '9000:9000'
+    #     - '9092:9092'
