@@ -1,0 +1,105 @@
+version: '3.9'
+
+services:
+    server-config:
+        image: 192.168.0.30:5000/server-config:latest
+        ports:
+         - "8888:8888"
+        networks:
+         - api-article-net
+        environment:
+         - PROFILE_JAR=prod
+    server-discovery:
+        image: 192.168.0.30:5000/server-discovery:latest 
+        ports:
+         - "1111:1111"
+        networks:
+         - api-article-net
+        environment:
+         - PROFILE_JAR=prod
+    service-postgres12:
+        image: postgres:12-alpine
+        ports:
+         - "5432:5432"
+        networks:
+         - api-article-net
+        restart: always
+        volumes:
+         - /volumenes/vol_postgresql:/var/lib/postgresql/data
+        environment: 
+            POSTGRES_DB: articulos
+            POSTGRES_PASSWORD: 12345678
+            PGDATA: /var/lib/postgresql/data/pgdata
+        deploy:
+            mode: replicated
+            replicas: 1
+            placement:
+                constraints:
+                 - "node.role==manager"
+    service-rabbitmq:
+        image: rabbitmq:3.8.10-management-alpine
+        ports:
+         - "15672:15672"
+         - "5672:5672"
+        networks:
+         - api-article-net
+    service-zipkin:
+        image: 192.168.0.30:5000/server-zipkin:latest
+        ports:
+                - "9411:9411"
+        networks:
+         - api-article-net
+        environment:
+         - RABBIT_ADDRESSES=service-rabbitmq:5672
+        depends_on:
+         - service-rabbitmq
+    service-acceso-datos:
+        image: 192.168.0.30:5000/server-acceso-datos:latest
+        ports:
+         - "5003:5003"
+        networks:
+         - api-article-net
+        environment:
+         - PROFILE_JAR=prod
+         - SERVER_DISCOVERY=server-discovery
+         - SERVER_BD=service-postgres12
+        depends_on:
+         - service-rabbitmq 
+         - service-zipkin
+         - service-postgres12
+         - server-discovery
+         - server-config
+    service-business:
+        image: 192.168.0.30:5000/server-business:latest
+        ports:
+         - "5000:5000"
+        networks:
+         - api-article-net
+        environment:
+         - PROFILE_JAR=prod
+         - SERVER_DISCOVERY=server-discovery
+        depends_on:
+         - service-rabbitmq
+         - service-zipkin
+         - service-postgres12
+         - server-discovery
+         - server-config
+        volumes:
+         - /volumenes/vol_repository:/opt/repository
+    service-gateway:
+        image: 192.168.0.30:5000/server-gateway:latest
+        ports:
+         - "5002:5002"
+        networks:
+         - api-article-net
+        environment:
+         - PROFILE_JAR=prod
+         - SERVER_DISCOVERY=server-discovery
+        depends_on:
+         - service-rabbitmq
+         - service-zipkin
+         - service-postgres12
+         - server-discovery
+         - server-config
+networks: 
+    api-article-net: 
