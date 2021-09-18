@@ -4,7 +4,9 @@ pipeline {
     agent any
     stages {
         stage('Remove container'){
-           echo "Funciona " + urlRepoFront
+            steps{
+                echo "Funciona " + urlRepoFront
+            }
         }
     }
 }
