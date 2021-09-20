@@ -21,7 +21,7 @@ pipeline {
                 }
             }
         }
-        stage('Build-front'){
+        stage('Run Docker'){
             steps{
                 sh '''
                     docker run -d -p 5010:80 \
