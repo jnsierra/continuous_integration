@@ -5,7 +5,7 @@ pipeline {
     stages {
         stage('Clone Repo Front'){
           steps {
-            sh 'mkdir -p build-back'
+            sh 'mkdir -p build-front'
             dir('build-front'){
                     git branch: 'develop', url: urlRepoFront
             }
