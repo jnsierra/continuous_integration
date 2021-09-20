@@ -1,4 +1,5 @@
 String urlRepoFront = "https://github.com/jnsierra/articulos-web.git"
+String ipRegistry = "192.168.0.30"
 
 pipeline {
     agent any
@@ -11,10 +12,22 @@ pipeline {
             }
           }
         }
-        stage('Remove container'){
+        stage('Build-front'){
             steps{
-                echo "Funciona " + urlRepoFront
+                sh 'docker build -t "${IP_REGISTRY}:5000/angular-cli:latest" .'
+                sh 'docker push ${IP_REGISTRY}:5000/angular-cli:latest'
+                sh 'docker rmi ${IP_REGISTRY}:5000/angular-cli:latest'
             }
+        }
+        stage('Build-front'){
+            steps{
+                sh '''
+                    docker run -d -p 5010:80 \
+                               --name frontend-art \
+                               ${IP_REGISTRY}:5000/angular-cli:latest
+                '''
+            }
+            
         }
     }
 }
