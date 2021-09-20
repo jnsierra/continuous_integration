@@ -7,7 +7,7 @@ pipeline {
           steps {
             sh 'mkdir -p build-front'
             dir('build-front'){
-                    git branch: 'develop', url: urlRepoFront
+                    git branch: 'master', url: urlRepoFront
             }
           }
         }
