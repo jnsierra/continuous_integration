@@ -4,6 +4,18 @@ String ipRegistry = "192.168.0.30"
 pipeline {
     agent any
     stages {
+        stage('Stop Container'){
+          steps {
+            script {
+                try {
+                    sh 'docker stop frontend-art'
+                    sh 'docker rm frontend-art'
+                 } catch (Exception e) {
+                  echo 'No fue posible borrar el contenedor de frontend'
+                 }
+            }
+          }
+        }
         stage('Clone Repo Front'){
           steps {
             sh 'mkdir -p build-front'
